@@ -25,6 +25,7 @@
 namespace mod_booking\option\fields;
 
 use core_course_external;
+use mod_booking\bo_availability\conditions\booking_time;
 use mod_booking\booking_option_settings;
 use mod_booking\option\fields_info;
 use mod_booking\option\field_base;
@@ -97,6 +98,14 @@ class bookingclosingtime extends field_base {
         int $updateparam,
         $returnvalue = null
     ): array {
+
+        // Resolve booking_time persistence values (condition logic) and apply closing-related values here.
+        $bookingtimedata = booking_time::resolve_persistence_data($formdata);
+        if ($bookingtimedata->hasclosing) {
+            $formdata->restrictanswerperiodclosing = $bookingtimedata->restrictanswerperiodclosing;
+            $formdata->bookingclosingtime = $bookingtimedata->bookingclosingtime;
+        }
+        booking_time::upsert_condition_in_availability($formdata);
 
         $key = fields_info::get_class_name(static::class);
         $value = $formdata->{$key} ?? null;

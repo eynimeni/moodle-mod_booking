@@ -781,6 +781,42 @@ if ($ADMIN->fulltree) {
                 get_string('conditionssettings_desc', 'mod_booking')
             )
         );
+        $settings->add(
+            new admin_setting_configcheckbox(
+                'booking/bookingtimerelativeenabled',
+                get_string('bookingtimerelativeenabled', 'mod_booking'),
+                get_string('bookingtimerelativeenabled_desc', 'mod_booking'),
+                0
+            )
+        );
+        $settings->add(
+            new admin_setting_configduration(
+                'booking/bookingtimerelativedefaultopeningduration',
+                get_string('bookingtimerelativedefaultopeningduration', 'mod_booking'),
+                get_string('bookingtimerelativedefaultopeningduration_desc', 'mod_booking'),
+                86400
+            )
+        );
+        $settings->hide_if(
+            'booking/bookingtimerelativedefaultopeningduration',
+            'booking/bookingtimerelativeenabled',
+            'eq',
+            0
+        );
+        $settings->add(
+            new admin_setting_configduration(
+                'booking/bookingtimerelativedefaultclosingduration',
+                get_string('bookingtimerelativedefaultclosingduration', 'mod_booking'),
+                get_string('bookingtimerelativedefaultclosingduration_desc', 'mod_booking'),
+                86400
+            )
+        );
+        $settings->hide_if(
+            'booking/bookingtimerelativedefaultclosingduration',
+            'booking/bookingtimerelativeenabled',
+            'eq',
+            0
+        );
         // Use SQL for availability conditions.
         $settings->add(
             new admin_setting_configcheckbox(
