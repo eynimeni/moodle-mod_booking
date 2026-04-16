@@ -312,12 +312,20 @@ class booking_time implements bo_condition {
             }
         }
 
-        // Opening time mode select.
+        // Opening time mode select - checkbox enables/disables this choice.
         $modes = [
-            0 => get_string('bookingtimenomode', 'mod_booking'),
             1 => get_string('bookingtimeabsolutemode', 'mod_booking'),
             2 => get_string('bookingtimerelativemode', 'mod_booking'),
         ];
+        // Master checkbox - enables/disables the time restrictions for opening period.
+        $mform->addElement(
+            'advcheckbox',
+            'restrictanswerperiodopening',
+            get_string('restrictanswerperiodopening', 'mod_booking')
+        );
+        $mform->setDefault('restrictanswerperiodopening', $openingmode > 0 ? 1 : 0);
+
+        // Opening time mode select - only shown when checkbox is checked.
         if ($relativemodeenabled) {
             $mform->addElement(
                 'select',
@@ -325,7 +333,10 @@ class booking_time implements bo_condition {
                 get_string('restrictanswerperiodopening', 'mod_booking'),
                 $modes
             );
-            $mform->setDefault('booking_time_opening_mode', $openingmode);
+            // Hide mode select when checkbox is unchecked.
+            $mform->hideIf('booking_time_opening_mode', 'restrictanswerperiodopening', 'eq', 0);
+            // Set default to absolute mode (1) when enabled, never 0.
+            $mform->setDefault('booking_time_opening_mode', max(1, $openingmode));
         }
 
         // Opening time absolute.
@@ -338,7 +349,10 @@ class booking_time implements bo_condition {
         $mform->setType('bookingopeningtime', PARAM_INT);
         $defaultopeningtime = $conditionobject->openingtime ?? $settings->bookingopeningtime ?? time_handler::prettytime(time());
         $mform->setDefault('bookingopeningtime', $defaultopeningtime);
+        // Hide opening time picker when checkbox unchecked.
+        $mform->hideIf('bookingopeningtime', 'restrictanswerperiodopening', 'eq', 0);
         if ($relativemodeenabled) {
+            // Also hide when mode is not absolute.
             $mform->hideIf('bookingopeningtime', 'booking_time_opening_mode', 'neq', 1);
         }
 
@@ -356,6 +370,8 @@ class booking_time implements bo_condition {
                 'booking_time_opening_relative_duration',
                 $conditionobject->openingrelativeduration ?? self::get_default_relative_opening_duration()
             );
+            // Hide relative duration when checkbox unchecked or mode is not relative.
+            $mform->hideIf('booking_time_opening_relative_duration', 'restrictanswerperiodopening', 'eq', 0);
             $mform->hideIf('booking_time_opening_relative_duration', 'booking_time_opening_mode', 'neq', 2);
 
             $mform->addElement(
@@ -368,6 +384,8 @@ class booking_time implements bo_condition {
                 ]
             );
             $mform->setDefault('booking_time_opening_relative_beforeafter', $conditionobject->openingrelativebeforeafter ?? 1);
+            // Hide relative before/after when checkbox unchecked or mode is not relative.
+            $mform->hideIf('booking_time_opening_relative_beforeafter', 'restrictanswerperiodopening', 'eq', 0);
             $mform->hideIf('booking_time_opening_relative_beforeafter', 'booking_time_opening_mode', 'neq', 2);
 
             $mform->addElement(
@@ -378,10 +396,20 @@ class booking_time implements bo_condition {
             );
             $openingdatefield = $conditionobject->openingrelativedatefield ?? 'coursestarttime';
             $mform->setDefault('booking_time_opening_relative_datefield', $openingdatefield);
+            // Hide relative datefield when checkbox unchecked or mode is not relative.
+            $mform->hideIf('booking_time_opening_relative_datefield', 'restrictanswerperiodopening', 'eq', 0);
             $mform->hideIf('booking_time_opening_relative_datefield', 'booking_time_opening_mode', 'neq', 2);
         }
 
-        // Closing time mode select.
+        // Master checkbox - enables/disables the time restrictions for closing period.
+        $mform->addElement(
+            'advcheckbox',
+            'restrictanswerperiodclosing',
+            get_string('restrictanswerperiodclosing', 'mod_booking')
+        );
+        $mform->setDefault('restrictanswerperiodclosing', $closingmode > 0 ? 1 : 0);
+
+        // Closing time mode select - only shown when checkbox is checked.
         if ($relativemodeenabled) {
             $mform->addElement(
                 'select',
@@ -389,7 +417,10 @@ class booking_time implements bo_condition {
                 get_string('restrictanswerperiodclosing', 'mod_booking'),
                 $modes
             );
-            $mform->setDefault('booking_time_closing_mode', $closingmode);
+            // Hide mode select when checkbox is unchecked.
+            $mform->hideIf('booking_time_closing_mode', 'restrictanswerperiodclosing', 'eq', 0);
+            // Set default to absolute mode (1) when enabled, never 0.
+            $mform->setDefault('booking_time_closing_mode', max(1, $closingmode));
         }
 
         // Closing time absolute.
@@ -402,7 +433,10 @@ class booking_time implements bo_condition {
         $mform->setType('bookingclosingtime', PARAM_INT);
         $defaultclosingtime = $conditionobject->closingtime ?? $settings->bookingclosingtime ?? time_handler::prettytime(time());
         $mform->setDefault('bookingclosingtime', $defaultclosingtime);
+        // Hide closing time picker when checkbox unchecked.
+        $mform->hideIf('bookingclosingtime', 'restrictanswerperiodclosing', 'eq', 0);
         if ($relativemodeenabled) {
+            // Also hide when mode is not absolute.
             $mform->hideIf('bookingclosingtime', 'booking_time_closing_mode', 'neq', 1);
         }
 
@@ -417,6 +451,8 @@ class booking_time implements bo_condition {
                 'booking_time_closing_relative_duration',
                 $conditionobject->closingrelativeduration ?? self::get_default_relative_closing_duration()
             );
+            // Hide relative duration when checkbox unchecked or mode is not relative.
+            $mform->hideIf('booking_time_closing_relative_duration', 'restrictanswerperiodclosing', 'eq', 0);
             $mform->hideIf('booking_time_closing_relative_duration', 'booking_time_closing_mode', 'neq', 2);
 
             $mform->addElement(
@@ -429,6 +465,8 @@ class booking_time implements bo_condition {
                 ]
             );
             $mform->setDefault('booking_time_closing_relative_beforeafter', $conditionobject->closingrelativebeforeafter ?? 1);
+            // Hide relative before/after when checkbox unchecked or mode is not relative.
+            $mform->hideIf('booking_time_closing_relative_beforeafter', 'restrictanswerperiodclosing', 'eq', 0);
             $mform->hideIf('booking_time_closing_relative_beforeafter', 'booking_time_closing_mode', 'neq', 2);
 
             $mform->addElement(
@@ -439,6 +477,8 @@ class booking_time implements bo_condition {
             );
             $closingdatefield = $conditionobject->closingrelativedatefield ?? 'coursestarttime';
             $mform->setDefault('booking_time_closing_relative_datefield', $closingdatefield);
+            // Hide relative datefield when checkbox unchecked or mode is not relative.
+            $mform->hideIf('booking_time_closing_relative_datefield', 'restrictanswerperiodclosing', 'eq', 0);
             $mform->hideIf('booking_time_closing_relative_datefield', 'booking_time_closing_mode', 'neq', 2);
         }
 
@@ -1033,8 +1073,9 @@ class booking_time implements bo_condition {
             $closingmode = 1;
         }
 
-        $defaultvalues->booking_time_opening_mode = $openingmode ?? 0;
-        $defaultvalues->booking_time_closing_mode = $closingmode ?? 0;
+        // Set mode defaults: ensure valid modes (1 or 2), never 0.
+        $defaultvalues->booking_time_opening_mode = ($openingmode > 0) ? $openingmode : 1;
+        $defaultvalues->booking_time_closing_mode = ($closingmode > 0) ? $closingmode : 1;
 
         if ($openingmode == 2) {
             // Relative opening: load relative data from JSON.
